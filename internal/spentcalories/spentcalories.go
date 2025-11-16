@@ -149,5 +149,6 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 Длительность: %.2f ч.
 Дистанция: %.2f км.
 Скорость: %.2f км/ч
-Сожгли калорий: %.2f`, activity, hours, distanceKm, speed, calories), nil
+Сожгли калорий: %.2f
+`, activity, hours, distanceKm, speed, calories), nil
 }

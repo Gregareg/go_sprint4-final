@@ -2,6 +2,7 @@ package daysteps
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -28,9 +29,19 @@ func parsePackage(data string) (int, time.Duration, error) {
 		return 0, 0, fmt.Errorf("количество шагов не может быть пустым")
 	}
 
+	// Проверяем на пробелы внутри числа
+	if strings.ContainsAny(stepsStr, " \t\n") {
+		return 0, 0, fmt.Errorf("неверный формат данных")
+	}
+
+	// Обрабатываем случаи
+	if stepsStr == "+" || stepsStr == "-" {
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов")
+	}
+
 	steps, err := strconv.Atoi(stepsStr)
 	if err != nil {
-		return 0, 0, fmt.Errorf("ошибка преобразования шагов: %w", err)
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов")
 	}
 
 	// Проверяем, что шаги положительные
@@ -42,7 +53,7 @@ func parsePackage(data string) (int, time.Duration, error) {
 	durationStr := strings.TrimSpace(parts[1])
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
-		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности: %w", err)
+		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности")
 	}
 
 	// Проверяем, что продолжительность положительная
@@ -56,7 +67,7 @@ func parsePackage(data string) (int, time.Duration, error) {
 func DayActionInfo(data string, weight, height float64) string {
 	steps, duration, err := parsePackage(data)
 	if err != nil {
-		fmt.Println("Ошибка:", err)
+		log.Println("Ошибка:", err)
 		return ""
 	}
 
@@ -67,7 +78,7 @@ func DayActionInfo(data string, weight, height float64) string {
 	// Вычисляем калории
 	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 	if err != nil {
-		fmt.Println("Ошибка вычисления калорий:", err)
+		log.Println("Ошибка вычисления калорий:", err)
 		return ""
 	}
 

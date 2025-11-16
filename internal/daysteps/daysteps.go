@@ -24,17 +24,22 @@ func parsePackage(data string) (int, time.Duration, error) {
 	}
 
 	// Парсим количество шагов
-	stepsStr := strings.TrimSpace(parts[0])
+	stepsStr := parts[0]
 	if stepsStr == "" {
 		return 0, 0, fmt.Errorf("количество шагов не может быть пустым")
 	}
 
-	// Проверяем на пробелы внутри числа
-	if strings.ContainsAny(stepsStr, " \t\n") {
+	// Проверяем на пробелы в начале или конце
+	if strings.HasPrefix(stepsStr, " ") || strings.HasSuffix(stepsStr, " ") {
 		return 0, 0, fmt.Errorf("неверный формат данных")
 	}
 
-	// Обрабатываем случаи
+	// Проверяем на пробельные символы внутри
+	if strings.ContainsAny(stepsStr, " \t\n\r") {
+		return 0, 0, fmt.Errorf("неверный формат данных")
+	}
+
+	// Обрабатываем специальные случаи
 	if stepsStr == "+" || stepsStr == "-" {
 		return 0, 0, fmt.Errorf("ошибка преобразования шагов")
 	}
@@ -50,7 +55,11 @@ func parsePackage(data string) (int, time.Duration, error) {
 	}
 
 	// Парсим продолжительность
-	durationStr := strings.TrimSpace(parts[1])
+	durationStr := parts[1]
+	if strings.HasPrefix(durationStr, " ") || strings.HasSuffix(durationStr, " ") {
+		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности")
+	}
+
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
 		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности")

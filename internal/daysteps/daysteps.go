@@ -1,7 +1,13 @@
 package daysteps
 
 import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 )
 
 const (
@@ -12,9 +18,79 @@ const (
 )
 
 func parsePackage(data string) (int, time.Duration, error) {
-	// TODO: реализовать функцию
+	parts := strings.Split(data, ",")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("неверный формат данных")
+	}
+
+	// Парсим количество шагов
+	stepsStr := parts[0]
+	if stepsStr == "" {
+		return 0, 0, fmt.Errorf("количество шагов не может быть пустым")
+	}
+
+	// Проверяем на пробелы в начале или конце
+	if strings.HasPrefix(stepsStr, " ") || strings.HasSuffix(stepsStr, " ") {
+		return 0, 0, fmt.Errorf("неверный формат данных")
+	}
+
+	// Проверяем на пробельные символы внутри
+	if strings.ContainsAny(stepsStr, " \t\n\r") {
+		return 0, 0, fmt.Errorf("неверный формат данных")
+	}
+
+	// Обрабатываем специальные случаи
+	if stepsStr == "+" || stepsStr == "-" {
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов")
+	}
+
+	steps, err := strconv.Atoi(stepsStr)
+	if err != nil {
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов")
+	}
+
+	// Проверяем, что шаги положительные
+	if steps <= 0 {
+		return 0, 0, fmt.Errorf("количество шагов должно быть положительным")
+	}
+
+	// Парсим продолжительность
+	durationStr := parts[1]
+	if strings.HasPrefix(durationStr, " ") || strings.HasSuffix(durationStr, " ") {
+		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности")
+	}
+
+	duration, err := time.ParseDuration(durationStr)
+	if err != nil {
+		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности")
+	}
+
+	// Проверяем, что продолжительность положительная
+	if duration <= 0 {
+		return 0, 0, fmt.Errorf("продолжительность должна быть положительной")
+	}
+
+	return steps, duration, nil
 }
 
 func DayActionInfo(data string, weight, height float64) string {
-	// TODO: реализовать функцию
+	steps, duration, err := parsePackage(data)
+	if err != nil {
+		log.Println("Ошибка:", err)
+		return ""
+	}
+
+	// Вычисляем дистанцию в метрах и километрах
+	distanceMeters := float64(steps) * stepLength
+	distanceKm := distanceMeters / mInKm
+
+	// Вычисляем калории
+	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
+	if err != nil {
+		log.Println("Ошибка вычисления калорий:", err)
+		return ""
+	}
+
+	return fmt.Sprintf("Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.\n",
+		steps, distanceKm, calories)
 }

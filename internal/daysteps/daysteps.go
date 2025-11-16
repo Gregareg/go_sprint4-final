@@ -45,8 +45,7 @@ func parsePackage(data string) (int, time.Duration, error) {
 		return 0, 0, fmt.Errorf("ошибка преобразования продолжительности: %w", err)
 	}
 
-	return steps, duration, nil
-
+	// Проверяем, что продолжительность положительная
 	if duration <= 0 {
 		return 0, 0, fmt.Errorf("продолжительность должна быть положительной")
 	}

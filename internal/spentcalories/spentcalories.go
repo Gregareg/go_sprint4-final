@@ -2,7 +2,6 @@ package spentcalories
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -51,7 +50,7 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-	stepLength := height * stepLengthCoefficient
+	stepLength := height * stepLengthCoefficient // ✅ Исправлено
 	distanceMeters := float64(steps) * stepLength
 	return distanceMeters / mInKm
 }
@@ -63,12 +62,7 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 
 	distanceKm := distance(steps, height)
 	hours := duration.Hours()
-
-	if hours == 0 {
-		return 0
-	}
-
-	return distanceKm / hours
+	return distanceKm / hours // ✅ Упрощено
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
@@ -120,8 +114,7 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 func TrainingInfo(data string, weight, height float64) (string, error) {
 	steps, activity, duration, err := parseTraining(data)
 	if err != nil {
-		log.Println("Ошибка парсинга тренировки:", err)
-		return "", err
+		return "", err // ✅ Просто возвращаем ошибку
 	}
 
 	var calories float64
